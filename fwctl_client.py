@@ -234,8 +234,8 @@ class FwctlClient:
             #     __aligned_u64 req;      # Pointer to HWRM input
             #     __u32 req_len;          # Length of HWRM input
             #     __u32 timeout;          # Timeout (0 = default)
-            #     __u32 num_dma;          # Number of DMA buffers
-            #     __aligned_u64 payload;  # Pointer to DMA info array
+            #     __u32 reserved[2];      # Reserved, must be 0
+            #     __aligned_u64 reserved1;# Reserved, must be 0
             # }
             
             # Allocate memory for HWRM input
@@ -243,17 +243,14 @@ class FwctlClient:
             input_buffer = bytearray(hwrm_input)
             input_address = ctypes.addressof(ctypes.c_uint8.from_buffer(input_buffer))
             
-            # No DMA buffers for HWRM_VER_GET
-            num_dma = 0
-            payload_address = 0
-            
             # Pack the fwctl_rpc_bnxt structure
-            bnxt_rpc = struct.pack('<QQIIQ',
+            bnxt_rpc = struct.pack('<QIIIIQ',
                                   input_address,  # req
                                   input_size,     # req_len
                                   0,              # timeout (use default)
-                                  num_dma,        # num_dma
-                                  payload_address) # payload
+                                  0,              # reserved[0]
+                                  0,              # reserved[1]
+                                  0)              # reserved1
             
             logger.debug(f"BNXT RPC struct: {bnxt_rpc.hex()}")
             
